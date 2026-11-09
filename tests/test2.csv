@@ -1,0 +1,4 @@
+task_id,temperature_C,parameter_value
+1,a,0.25
+2,-5,0.40
+3,c,0.60
