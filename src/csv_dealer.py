@@ -4,7 +4,9 @@ import math
 import re
 
 _TASK_ID_RE = re.compile(r"\d+")
-_FLOAT_RE   = re.compile(r"-?\d+(\.\d+)?")
+_FLOAT_RE = re.compile(r"[+-]?\d+(\.\d+)?([eE][+-]?\d+)?")
+
+
 
 def csv_reader(csv_path:str) -> list[dict]:
     """读取 CSV，按 design.md 转换类型并校验。
@@ -27,9 +29,11 @@ def csv_reader(csv_path:str) -> list[dict]:
 
         #print(reader.fieldnames)
         EXPECTED = {"task_id", "temperature_C", "parameter_value"}
-        got = set(reader.fieldnames or [])
-        if len(got) != len(set(reader.fieldnames or [])):
+
+        filedname = reader.fieldnames or []
+        if len(filedname) != len(set(filedname)):
             raise ValueError(f"CSV 文件 {csv_path} 字段不合法，字段重复")
+        got = set(reader.fieldnames or [])
         if got != EXPECTED:
             missing = EXPECTED - got
             extra = got - EXPECTED
