@@ -52,6 +52,8 @@ def csv_reader(csv_path:str) -> list[dict]:
         #print(len(reader.fieldnames))
         #print(len(set(reader.fieldnames)))
         for rownum,row in enumerate(reader, start=2):
+            if row.get(None) is not None:
+                raise ValueError(f"第 {rownum} 行数据不合法，多余字段 {row[None]}")
             for k,v in row.items():
                 if v == "" or v is None:
                     raise ValueError(f"第 {rownum} 行数据不合法，字段 {k} 为空")

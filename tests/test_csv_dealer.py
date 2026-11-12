@@ -232,6 +232,11 @@ class TestRowValidation(CsvReaderTestBase):
         with self.assertRaisesRegex(ValueError, "不在"):
             csv_reader(path)
 
+    def test_extra_data__in_row(self):
+        path = self._write_csv(HEADER + "1,20,0.5,unexpected\n" )
+        with self.assertRaisesRegex(ValueError, "多余字段"):
+            csv_reader(path)
+
 
 if __name__ == "__main__":
     unittest.main()
