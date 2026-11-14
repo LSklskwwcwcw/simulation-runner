@@ -1,0 +1,9 @@
+对于dummyjob：
+
+使用sys库中的argv接受命令行传入参数，这里设计传入长度为2作为判断条件，同时，使用time库中的sleep方法来实现睡眠，同时使用sys库中的exit方法抛出数字代表错误类型
+
+
+对于process_runner：
+
+使用os库中的path方法来将抛出错误的函数路径加入以便调用执行
+使用subprocess来多线并行
