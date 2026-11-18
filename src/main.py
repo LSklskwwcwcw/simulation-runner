@@ -1,31 +1,39 @@
 import argparse
-from csv_dealer import csv_reader
 import sys
+from result_store import save_run_result
+from process_runner import run_job
 
 
-
-
-
-
+def status_judge(timeout:bool,exit_code:int|None):
+    if timeout is True:
+        return "timeout"
+    elif exit_code == 0:
+        return "success"
+    else:
+        return "failed"
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="读取 CSV 文件并打印内容")
+    parser = argparse.ArgumentParser(description="将内容存放为json")
 
-    parser.add_argument("csv_path", type=str, help="CSV 文件路径")
+
+    parser.add_argument("action",type=str,choices=["success", "failure", "slow", "unknown"],help="存为json")
 
     args = parser.parse_args()
 
-    try:
-        records = csv_reader(args.csv_path)
-        print("CSV 文件内容:")
-        for record in records:
-            print(record)
-    except FileNotFoundError as e:
-        print(f"错误: {e}")
-        sys.exit(1)
-    except ValueError as e:
-        print(f"错误: {e}")
-        sys.exit(1)
+    result = run_job(args.action)
+    status = status_judge(result["timed_out"],result["exit_code"])
+    save_run_result(
+        action  = result["action"],
+        status  = status,
+        attempts = 1,
+        exit_code = result["exit_code"],
+        timed_out = result["timed_out"]
+    )
+
+    if status == "success":
+        sys.exit(0)
+    else: sys.exit(1)
+
 
 
 

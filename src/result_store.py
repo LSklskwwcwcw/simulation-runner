@@ -8,9 +8,13 @@ def save_run_result(action:str,status:str,attempts:int,exit_code:int|None,timed_
     output_dir = os.path.join(ROOT_DIR, "outputs")
     filepath = os.path.join(output_dir, "run_result.json")
 
+    status_require = ["success","failed","timeout"]
     
-    os.makedirs(output_dir,exist_ok=True)
+    if status not in status_require:
+        raise ValueError(f"期望status是success/failed/timeout 之一，实际接收{status}")
 
+    os.makedirs(output_dir,exist_ok=True)
+    
     result_data = {
         "action":action,
         "status":status,
@@ -25,4 +29,3 @@ def save_run_result(action:str,status:str,attempts:int,exit_code:int|None,timed_
     print(f"已成功保存至{filepath}")
 
 
-save_run_result(action="success", status="success", attempts=1, exit_code=0, timed_out=False)
