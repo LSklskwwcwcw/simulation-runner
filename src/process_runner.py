@@ -1,6 +1,7 @@
 import sys
 import os
 import subprocess
+import time
 
 def run_job(action: str):
     """运行 dummy_job.py，传入 action 参数，返回 (exit_code, stdout, stderr)"""
@@ -16,9 +17,10 @@ def run_job(action: str):
             text=True,
             timeout=1,
         )
-
+        current_status = "success" if result.returncode == 0 else "failed"
         return {
             "action": action,
+            "status":current_status,
             "exit_code": result.returncode,
             "stdout": result.stdout.strip(),
             "stderr": result.stderr.strip(),
@@ -28,11 +30,44 @@ def run_job(action: str):
     except subprocess.TimeoutExpired as e:
         return {
             "action": action,
+            "status":"timeout",
             "exit_code": None,
             "stdout": "",
             "stderr":"",
             "timed_out": True,
         }
+
+def run_with_retry(action,max_attempts):
+    if max_attempts <= 0 :
+        raise ValueError("max_attempts必须大于0")
+    
+    final_result = None
+
+    for attempt in range(1,max_attempts+1):
+
+        result = run_job(action)
+        result["attempts"] = attempt
+        final_result = result
+
+        if result["status"] == "success":
+            return result
+        
+        elif result["status"] == "failed":
+            if attempt == max_attempts:
+                return result
+            else:
+                print(f"遇到业务失败，进行第 {attempt+1} 次尝试...")
+                time.sleep(1)
+
+        elif result["status"] == "timeout":
+            if attempt == max_attempts:
+                print("重试次数用完")
+                return result
+            else:
+                print(f"超时，准备进行{attempt + 1}次尝试")
+                time.sleep(1)
+    return final_result
+        
 
 if __name__ == "__main__":
     for action in ["success", "failure", "slow", "unknown"]:

@@ -1,7 +1,7 @@
 import argparse
 import sys
 from result_store import save_run_result
-from process_runner import run_job
+from process_runner import run_with_retry
 
 
 def status_judge(timeout:bool,exit_code:int|None):
@@ -18,21 +18,25 @@ if __name__ == "__main__":
 
     parser.add_argument("action",type=str,choices=["success", "failure", "slow", "unknown"],help="存为json")
 
+    parser.add_argument("--max--attempts",type=int,default=3,help="最大重试次数")
+
     args = parser.parse_args()
+    try:
+        result = run_with_retry(args.action,args.max_attempts)
+        save_run_result(
+            action  = result["action"],
+            status  = result["status"],
+            attempts = result["attempts"],
+            exit_code = result["exit_code"],
+            timed_out = result["timed_out"]
+        )
 
-    result = run_job(args.action)
-    status = status_judge(result["timed_out"],result["exit_code"])
-    save_run_result(
-        action  = result["action"],
-        status  = status,
-        attempts = 1,
-        exit_code = result["exit_code"],
-        timed_out = result["timed_out"]
-    )
-
-    if status == "success":
-        sys.exit(0)
-    else: sys.exit(1)
+        if result["status"] == "success":
+            sys.exit(0)
+        else: sys.exit(1)
+    except ValueError as e:
+        print(f"参数错误: {e}")
+        sys.exit(1)
 
 
 
