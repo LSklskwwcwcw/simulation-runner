@@ -1,16 +1,12 @@
 import argparse
 import sys
+import uuid
+import datetime
+from history_store import append_run_history
 from result_store import save_run_result
 from process_runner import run_with_retry
 
 
-def status_judge(timeout:bool,exit_code:int|None):
-    if timeout is True:
-        return "timeout"
-    elif exit_code == 0:
-        return "success"
-    else:
-        return "failed"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="将内容存放为json")
@@ -23,6 +19,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     try:
         result = run_with_retry(args.action,args.max_attempts)
+        job_id = str(uuid.uuid4())
+        timestamp_utc = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+        result["job_id"] = job_id
+        result["timestamp_utc"] = timestamp_utc
         save_run_result(
             action  = result["action"],
             status  = result["status"],
@@ -30,6 +31,8 @@ if __name__ == "__main__":
             exit_code = result["exit_code"],
             timed_out = result["timed_out"]
         )
+
+        append_run_history(result)
 
         if result["status"] == "success":
             sys.exit(0)
