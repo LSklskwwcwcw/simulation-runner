@@ -32,9 +32,14 @@ if __name__ == "__main__":
             timed_out = result["timed_out"]
         )
 
-        append_run_history(result)
+        history_saved = True
+        try:
+            append_run_history(result)
+        except (TypeError,OSError) as e:
+            history_saved = False
+            print(f"历史记录保存失败，原因：{e}")
 
-        if result["status"] == "success":
+        if result["status"] == "success" and history_saved:
             sys.exit(0)
         else: sys.exit(1)
     except ValueError as e:

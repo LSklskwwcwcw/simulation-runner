@@ -11,9 +11,9 @@ filepath = os.path.join(output_dir, "run_history.jsonl")
 def append_run_history(record:dict):
 
     os.makedirs(output_dir, exist_ok=True)
-    try:
-        with open(filepath,"a",encoding="utf-8") as f:
-            json_str = json.dumps(record,ensure_ascii=False) + "\n"
-            f.write(json_str)
-    except Exception as e:
-        print(f"写入历史失败{e}")
+    with open(filepath,"a",encoding="utf-8") as f:
+        json_str = json.dumps(record,ensure_ascii=False) + "\n"
+        f.write(json_str)
+
+
+    return True
