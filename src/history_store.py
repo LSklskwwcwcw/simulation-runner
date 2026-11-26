@@ -8,11 +8,14 @@ output_dir = os.path.join(ROOT_DIR, "outputs")
 filepath = os.path.join(output_dir, "run_history.jsonl")
 
 
-def append_run_history(record:dict):
-
-    os.makedirs(output_dir, exist_ok=True)
+def append_run_history(record:dict,file_path:str |None = None):
+    if file_path is None:
+        file_path = filepath
+    dirna = os.path.dirname(file_path)
+    if dirna:
+        os.makedirs(dirna, exist_ok=True)
     json_str = json.dumps(record,ensure_ascii=False) + "\n"
-    with open(filepath,"a",encoding="utf-8") as f:
+    with open(file_path,"a",encoding="utf-8") as f:
         f.write(json_str)
 
 
